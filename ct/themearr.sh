@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
-# Copyright (c) 2021-2026 community-scripts ORG
+source <(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/build.func)
+# Copyright (c) 2021-2026 Themearr ORG
 # Author: Themearr
 # License: MIT | https://github.com/Themearr/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/Themearr/themearr
