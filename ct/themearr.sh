@@ -55,7 +55,12 @@ function update_script() {
     msg_ok "Backed up Data"
 
     # Step 5: Download and deploy new pre-built release
-    CLEAN_INSTALL=1 fetch_and_deploy_gh_release "themearr" "Themearr/themearr" "prebuild" "latest" "/opt/themearr"
+    ARCH=$(uname -m)
+    case "$ARCH" in
+      x86_64)  ARCH_SUFFIX="linux-x64" ;;
+      aarch64) ARCH_SUFFIX="linux-arm64" ;;
+    esac
+    CLEAN_INSTALL=1 fetch_and_deploy_gh_release "themearr" "Themearr/themearr" "prebuild" "latest" "/opt/themearr" "themearr-${ARCH_SUFFIX}.tar.gz"
 
     # Step 6: Restore data
     msg_info "Restoring Data"
