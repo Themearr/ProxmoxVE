@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2026 community-scripts ORG
+# Copyright (c) 2021-2026 Themearr ORG
 # Author: tteck (tteckster) | MickLesk | michelroegl-brunner
-# License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/branch/main/LICENSE
+# License: MIT | https://github.com/Themearr/ProxmoxVE/raw/branch/main/LICENSE
 
 # ==============================================================================
 # BUILD.FUNC - LXC CONTAINER BUILD & CONFIGURATION
@@ -57,8 +57,8 @@ variables() {
 
   # Setup persistent log directory if logs mode active
   if [[ "${DEV_MODE_LOGS:-false}" == "true" ]]; then
-    mkdir -p /var/log/community-scripts
-    BUILD_LOG="/var/log/community-scripts/create-lxc-${SESSION_ID}-$(date +%Y%m%d_%H%M%S).log"
+    mkdir -p /var/log/Themearr
+    BUILD_LOG="/var/log/Themearr/create-lxc-${SESSION_ID}-$(date +%Y%m%d_%H%M%S).log"
   fi
 
   # Get Proxmox VE version and kernel version
@@ -83,16 +83,16 @@ variables() {
   fi
 }
 
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/api.func)
+source <(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/api.func)
 
 if command -v curl >/dev/null 2>&1; then
-  source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/core.func)
-  source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/error_handler.func)
+  source <(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/core.func)
+  source <(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/error_handler.func)
   load_functions
   catch_errors
 elif command -v wget >/dev/null 2>&1; then
-  source <(wget -qO- https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/core.func)
-  source <(wget -qO- https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/error_handler.func)
+  source <(wget -qO- https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/core.func)
+  source <(wget -qO- https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/error_handler.func)
   load_functions
   catch_errors
 fi
@@ -136,12 +136,12 @@ maxkeys_check() {
   failure=0
   if [[ "$used_lxc_keys" -gt "$threshold_keys" ]]; then
     msg_warn "Key usage is near the limit (${used_lxc_keys}/${per_user_maxkeys})"
-    echo -e "${INFO} Suggested action: Set ${GN}kernel.keys.maxkeys=${new_limit_keys}${CL} in ${BOLD}/etc/sysctl.d/98-community-scripts.conf${CL}."
+    echo -e "${INFO} Suggested action: Set ${GN}kernel.keys.maxkeys=${new_limit_keys}${CL} in ${BOLD}/etc/sysctl.d/98-Themearr.conf${CL}."
     failure=1
   fi
   if [[ "$used_lxc_bytes" -gt "$threshold_bytes" ]]; then
     msg_warn "Key byte usage is near the limit (${used_lxc_bytes}/${per_user_maxbytes})"
-    echo -e "${INFO} Suggested action: Set ${GN}kernel.keys.maxbytes=${new_limit_bytes}${CL} in ${BOLD}/etc/sysctl.d/98-community-scripts.conf${CL}."
+    echo -e "${INFO} Suggested action: Set ${GN}kernel.keys.maxbytes=${new_limit_bytes}${CL} in ${BOLD}/etc/sysctl.d/98-Themearr.conf${CL}."
     failure=1
   fi
 
@@ -214,8 +214,8 @@ update_motd_ip() {
   fi
 
   # Update dynamic LXC details profile if values changed (e.g., after OS upgrade)
-  # Only update if file exists and is from community-scripts
-  if [ -f "$PROFILE_FILE" ] && grep -q "community-scripts" "$PROFILE_FILE" 2>/dev/null; then
+  # Only update if file exists and is from Themearr
+  if [ -f "$PROFILE_FILE" ] && grep -q "Themearr" "$PROFILE_FILE" 2>/dev/null; then
     # Get current values
     local current_os="$(grep ^NAME /etc/os-release | cut -d= -f2 | tr -d '"') - Version: $(grep ^VERSION_ID /etc/os-release | cut -d= -f2 | tr -d '"')"
     local current_hostname="$(hostname)"
@@ -1245,7 +1245,7 @@ load_vars_file() {
 # ------------------------------------------------------------------------------
 # default_var_settings
 #
-# - Ensures /usr/local/community-scripts/default.vars exists (creates if missing)
+# - Ensures /usr/local/Themearr/default.vars exists (creates if missing)
 # - Loads var_* values from default.vars (safe parser, no source/eval)
 # - Precedence: ENV var_* > default.vars > built-in defaults
 # - Maps var_verbose → VERBOSE
@@ -1273,8 +1273,8 @@ default_var_settings() {
   _find_default_vars() {
     local f
     for f in \
-      /usr/local/community-scripts/default.vars \
-      "$HOME/.config/community-scripts/default.vars" \
+      /usr/local/Themearr/default.vars \
+      "$HOME/.config/Themearr/default.vars" \
       "./default.vars"; do
       [ -f "$f" ] && {
         echo "$f"
@@ -1292,9 +1292,9 @@ default_var_settings() {
   _ensure_default_vars() {
     _find_default_vars >/dev/null 2>&1 && return 0
 
-    local canonical="/usr/local/community-scripts/default.vars"
+    local canonical="/usr/local/Themearr/default.vars"
     # Silent creation - no msg_info output
-    mkdir -p /usr/local/community-scripts
+    mkdir -p /usr/local/Themearr
 
     # Pick storages before writing the file (always ask unless only one)
     # Create a minimal temp file to write into
@@ -1302,7 +1302,7 @@ default_var_settings() {
 
     # Base content (no var_ctid / var_hostname here)
     cat >"$canonical" <<'EOF'
-# Community-Scripts defaults (var_* only). Lines starting with # are comments.
+# Themearr defaults (var_* only). Lines starting with # are comments.
 # Precedence: ENV var_* > default.vars > built-ins.
 # Keep keys alphabetically sorted.
 
@@ -1408,12 +1408,12 @@ EOF
 # get_app_defaults_path()
 #
 # - Returns full path for app-specific defaults file
-# - Example: /usr/local/community-scripts/defaults/<app>.vars
+# - Example: /usr/local/Themearr/defaults/<app>.vars
 # ------------------------------------------------------------------------------
 
 get_app_defaults_path() {
   local n="${NSAPP:-${APP,,}}"
-  echo "/usr/local/community-scripts/defaults/${n}.vars"
+  echo "/usr/local/Themearr/defaults/${n}.vars"
 }
 
 # ------------------------------------------------------------------------------
@@ -1421,7 +1421,7 @@ get_app_defaults_path() {
 #
 # - Called after advanced_settings returned with fully chosen values.
 # - If no <nsapp>.vars exists, offers to persist current advanced settings
-#   into /usr/local/community-scripts/defaults/<nsapp>.vars
+#   into /usr/local/Themearr/defaults/<nsapp>.vars
 # - Only writes whitelisted var_* keys.
 # - Extracts raw values from flags like ",gw=..." ",mtu=..." etc.
 # ------------------------------------------------------------------------------
@@ -1755,7 +1755,7 @@ ensure_storage_selection_for_vars_file() {
 }
 
 ensure_global_default_vars_file() {
-  local vars_path="/usr/local/community-scripts/default.vars"
+  local vars_path="/usr/local/Themearr/default.vars"
   if [[ ! -f "$vars_path" ]]; then
     mkdir -p "$(dirname "$vars_path")"
     touch "$vars_path"
@@ -2845,14 +2845,14 @@ Advanced:
 # ------------------------------------------------------------------------------
 # diagnostics_check()
 #
-# - Ensures diagnostics config file exists at /usr/local/community-scripts/diagnostics
+# - Ensures diagnostics config file exists at /usr/local/Themearr/diagnostics
 # - Asks user whether to send anonymous diagnostic data (first run only)
 # - Saves DIAGNOSTICS=yes/no in the config file
 # - Reads current diagnostics setting from existing file
 # - Sets global DIAGNOSTICS variable for API telemetry opt-in/out
 # ------------------------------------------------------------------------------
 diagnostics_check() {
-  local config_dir="/usr/local/community-scripts"
+  local config_dir="/usr/local/Themearr"
   local config_file="${config_dir}/diagnostics"
 
   mkdir -p "$config_dir"
@@ -2867,7 +2867,7 @@ diagnostics_check() {
   result=$(whiptail --backtitle "Proxmox VE Helper Scripts" \
     --title "TELEMETRY & DIAGNOSTICS" \
     --ok-button "Confirm" --cancel-button "Exit" \
-    --radiolist "\nHelp improve Community-Scripts by sharing anonymous data.\n\nWhat we collect:\n  - Container resources (CPU, RAM, disk), OS & PVE version\n  - Application name, install method and status\n\nWhat we DON'T collect:\n  - No IP addresses, hostnames, or personal data\n\nYou can change this anytime in the Settings menu.\nPrivacy: https://github.com/community-scripts/telemetry-service/blob/main/docs/PRIVACY.md\n\nUse SPACE to select, ENTER to confirm." 22 76 2 \
+    --radiolist "\nHelp improve Themearr by sharing anonymous data.\n\nWhat we collect:\n  - Container resources (CPU, RAM, disk), OS & PVE version\n  - Application name, install method and status\n\nWhat we DON'T collect:\n  - No IP addresses, hostnames, or personal data\n\nYou can change this anytime in the Settings menu.\nPrivacy: https://github.com/Themearr/telemetry-service/blob/main/docs/PRIVACY.md\n\nUse SPACE to select, ENTER to confirm." 22 76 2 \
     "yes" "Yes, share anonymous data" OFF \
     "no" "No, opt out" OFF \
     3>&1 1>&2 2>&3) || result="no"
@@ -2877,8 +2877,8 @@ diagnostics_check() {
   cat <<EOF >"$config_file"
 DIAGNOSTICS=${DIAGNOSTICS}
 
-# Community-Scripts Telemetry Configuration
-# https://telemetry.community-scripts.org
+# Themearr Telemetry Configuration
+# https://telemetry.Themearr.org
 #
 # This file stores your telemetry preference.
 # Set DIAGNOSTICS=yes to share anonymous installation data.
@@ -2891,7 +2891,7 @@ DIAGNOSTICS=${DIAGNOSTICS}
 #   nsapp, method, pve_version, status, exit_code
 #
 # No personal data (IPs, hostnames, passwords) is ever collected.
-# Privacy: https://github.com/community-scripts/telemetry-service/blob/main/docs/PRIVACY.md
+# Privacy: https://github.com/Themearr/telemetry-service/blob/main/docs/PRIVACY.md
 EOF
 }
 
@@ -2904,7 +2904,7 @@ diagnostics_menu() {
     "Telemetry is currently: ${status_text}\n\n"
     "Anonymous data helps us improve scripts and track issues.\n"
     "No personal data is ever collected.\n\n"
-    "More info: https://telemetry.community-scripts.org\n\n"
+    "More info: https://telemetry.Themearr.org\n\n"
     "Do you want to ${current:+change this setting}?"
   )
 
@@ -2914,7 +2914,7 @@ diagnostics_menu() {
       --yesno "${dialog_text[*]}" 14 64 \
       --yes-button "Disable" --no-button "Keep enabled"; then
       DIAGNOSTICS="no"
-      sed -i 's/^DIAGNOSTICS=.*/DIAGNOSTICS=no/' /usr/local/community-scripts/diagnostics
+      sed -i 's/^DIAGNOSTICS=.*/DIAGNOSTICS=no/' /usr/local/Themearr/diagnostics
       whiptail --msgbox "Telemetry disabled.\n\nNote: Existing containers keep their current setting.\nNew containers will inherit this choice." 10 58
     fi
   else
@@ -2923,7 +2923,7 @@ diagnostics_menu() {
       --yesno "${dialog_text[*]}" 14 64 \
       --yes-button "Enable" --no-button "Keep disabled"; then
       DIAGNOSTICS="yes"
-      sed -i 's/^DIAGNOSTICS=.*/DIAGNOSTICS=yes/' /usr/local/community-scripts/diagnostics
+      sed -i 's/^DIAGNOSTICS=.*/DIAGNOSTICS=yes/' /usr/local/Themearr/diagnostics
       whiptail --msgbox "Telemetry enabled.\n\nNote: Existing containers keep their current setting.\nNew containers will inherit this choice." 10 58
     fi
   fi
@@ -3041,7 +3041,7 @@ install_script() {
     if [ -z "$CHOICE" ]; then
       TMP_CHOICE=$(whiptail \
         --backtitle "Proxmox VE Helper Scripts" \
-        --title "Community-Scripts Options" \
+        --title "Themearr Options" \
         --ok-button "Select" --cancel-button "Exit Script" \
         --notags \
         --menu "\nChoose an option:\n Use TAB or Arrow keys to navigate, ENTER to select.\n" \
@@ -3081,7 +3081,7 @@ install_script() {
         msg_error "Failed to apply default.vars"
         exit 110
       }
-      defaults_target="/usr/local/community-scripts/default.vars"
+      defaults_target="/usr/local/Themearr/default.vars"
       break
       ;;
     "$APPDEFAULTS_OPTION" | appdefaults | APPDEFAULTS)
@@ -3131,7 +3131,7 @@ install_script() {
 }
 
 edit_default_storage() {
-  local vf="/usr/local/community-scripts/default.vars"
+  local vf="/usr/local/Themearr/default.vars"
 
   # Ensure file exists
   if [[ ! -f "$vf" ]]; then
@@ -3158,7 +3158,7 @@ settings_menu() {
 
     local choice
     choice=$(whiptail --backtitle "Proxmox VE Helper Scripts" \
-      --title "Community-Scripts SETTINGS Menu" \
+      --title "Themearr SETTINGS Menu" \
       --ok-button "Select" --cancel-button "Exit Script" \
       --menu "\n\nChoose a settings option:\n\nUse Arrow keys to navigate, ENTER to select, TAB for buttons." 20 60 9 \
       "${settings_items[@]}" \
@@ -3166,7 +3166,7 @@ settings_menu() {
 
     case "$choice" in
     1) diagnostics_menu ;;
-    2) ${EDITOR:-nano} /usr/local/community-scripts/default.vars ;;
+    2) ${EDITOR:-nano} /usr/local/Themearr/default.vars ;;
     3)
       if [ -f "$(get_app_defaults_path)" ]; then
         ${EDITOR:-nano} "$(get_app_defaults_path)"
@@ -3479,7 +3479,7 @@ msg_menu() {
 # - Otherwise: shows update/setting menu and runs update_script with cleanup
 # ------------------------------------------------------------------------------
 start() {
-  source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/tools.func)
+  source <(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/tools.func)
   if command -v pveversion >/dev/null 2>&1; then
     install_script || return 0
     return 0
@@ -3617,9 +3617,9 @@ build_container() {
   pushd "$TEMP_DIR" >/dev/null
   local _func_url
   if [ "$var_os" == "alpine" ]; then
-    _func_url="https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/alpine-install.func"
+    _func_url="https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/alpine-install.func"
   else
-    _func_url="https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/install.func"
+    _func_url="https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/install.func"
   fi
   export FUNCTIONS_FILE_PATH="$(curl -fsSL "$_func_url")"
   if [[ -z "$FUNCTIONS_FILE_PATH" || ${#FUNCTIONS_FILE_PATH} -lt 100 ]]; then
@@ -3762,7 +3762,7 @@ $PCT_OPTIONS_STRING"
   #   - Environment variable: var_gpu=yes bash -c "..."
   #   - CT script default: var_gpu="${var_gpu:-no}"
   #   - Advanced settings wizard
-  #   - App defaults file: /usr/local/community-scripts/defaults/<app>.vars
+  #   - App defaults file: /usr/local/Themearr/defaults/<app>.vars
   is_gpu_app() {
     [[ "${var_gpu:-no}" == "yes" ]] && return 0
     return 1
@@ -4336,7 +4336,7 @@ EOF
     # that sends "configuring" status AFTER the host already reported "failed"
     export CONTAINER_INSTALLING=true
 
-    lxc-attach -n "$CTID" -- bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/install/${var_install}.sh)"
+    lxc-attach -n "$CTID" -- bash -c "$(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/install/${var_install}.sh)"
     local lxc_exit=$?
 
     unset CONTAINER_INSTALLING
@@ -4659,7 +4659,7 @@ EOF
         if [[ "${DEV_MODE_MOTD:-false}" == "true" ]]; then
           echo -e "${TAB}${HOLD}${DGN}Setting up MOTD and SSH for debugging...${CL}"
           if pct exec "$CTID" -- bash -c "
-              source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/install.func)
+              source <(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/install.func)
               declare -f motd_ssh >/dev/null 2>&1 && motd_ssh || true
             " >/dev/null 2>&1; then
             local ct_ip=$(pct exec "$CTID" ip a s dev eth0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1)
@@ -4731,7 +4731,7 @@ EOF
           # Re-run install script in existing container (don't destroy/recreate)
           set +Eeuo pipefail
           trap - ERR
-          lxc-attach -n "$CTID" -- bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/install/${var_install}.sh)"
+          lxc-attach -n "$CTID" -- bash -c "$(curl -fsSL https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/install/${var_install}.sh)"
           local apt_retry_exit=$?
           set -Eeuo pipefail
           trap 'error_handler' ERR
@@ -5906,7 +5906,7 @@ create_lxc_container() {
 #
 # - Sets container description with formatted HTML content
 # - Includes:
-#   * Community-Scripts logo
+#   * Themearr logo
 #   * Application name
 #   * Links to GitHub, Discussions, Issues
 #   * Ko-fi donation badge
@@ -5919,15 +5919,15 @@ description() {
 
   script_slug="${SCRIPT_SLUG:-${NSAPP}}"
   script_slug="$(echo "$script_slug" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
-  script_url="https://community-scripts.org/scripts/${script_slug}"
-  donate_url="https://community-scripts.org/donate"
+  script_url="https://Themearr.org/scripts/${script_slug}"
+  donate_url="https://Themearr.org/donate"
 
   # Generate LXC Description
   DESCRIPTION=$(
     cat <<EOF
 <div align='center'>
-  <a href='https://community-scripts.org' target='_blank' rel='noopener noreferrer'>
-    <img src='https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/images/logo-81x112.png' alt='Logo' style='width:81px;height:112px;'/>
+  <a href='https://Themearr.org' target='_blank' rel='noopener noreferrer'>
+    <img src='https://raw.githubusercontent.com/Themearr/ProxmoxVE/main/misc/images/logo-81x112.png' alt='Logo' style='width:81px;height:112px;'/>
   </a>
 
   <h2 style='font-size: 24px; margin: 20px 0;'>${APP} LXC</h2>
@@ -5946,15 +5946,15 @@ description() {
 
   <span style='margin: 0 10px;'>
     <i class="fa fa-github fa-fw" style="color: #f5f5f5;"></i>
-    <a href='https://github.com/community-scripts/ProxmoxVE' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>GitHub</a>
+    <a href='https://github.com/Themearr/ProxmoxVE' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>GitHub</a>
   </span>
   <span style='margin: 0 10px;'>
     <i class="fa fa-comments fa-fw" style="color: #f5f5f5;"></i>
-    <a href='https://github.com/community-scripts/ProxmoxVE/discussions' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>Discussions</a>
+    <a href='https://github.com/Themearr/ProxmoxVE/discussions' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>Discussions</a>
   </span>
   <span style='margin: 0 10px;'>
     <i class="fa fa-exclamation-circle fa-fw" style="color: #f5f5f5;"></i>
-    <a href='https://github.com/community-scripts/ProxmoxVE/issues' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>Issues</a>
+    <a href='https://github.com/Themearr/ProxmoxVE/issues' target='_blank' rel='noopener noreferrer' style='text-decoration: none; color: #00617f;'>Issues</a>
   </span>
 </div>
 EOF
