@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: Themearr
-# License: MIT | https://github.com/Themearr/ProxmoxVE/raw/main/LICENSE
+# License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/Themearr/themearr
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
