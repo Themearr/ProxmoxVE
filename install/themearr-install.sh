@@ -18,10 +18,11 @@ update_os
 # =============================================================================
 
 msg_info "Installing Dependencies"
+# Theme audio is fetched over HTTP from the youtube-mp36 RapidAPI, so ffmpeg/yt-dlp
+# are no longer needed. openssl is used to generate the API auth token below.
 $STD apt-get install -y \
   curl \
-  ffmpeg \
-  python3
+  openssl
 msg_ok "Installed Dependencies"
 
 # =============================================================================
@@ -32,16 +33,6 @@ msg_info "Installing .NET 9 Runtime"
 $STD bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 9.0 --runtime aspnetcore --install-dir /usr/share/dotnet"
 ln -sf /usr/share/dotnet/dotnet /usr/local/bin/dotnet
 msg_ok "Installed .NET 9 Runtime"
-
-# =============================================================================
-# YT-DLP
-# =============================================================================
-
-msg_info "Installing yt-dlp"
-$STD curl -sSL "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" \
-  -o /usr/local/bin/yt-dlp
-chmod +x /usr/local/bin/yt-dlp
-msg_ok "Installed yt-dlp"
 
 # =============================================================================
 # DOWNLOAD & DEPLOY APPLICATION
@@ -59,6 +50,16 @@ fetch_and_deploy_gh_release "themearr" "Themearr/themearr" "prebuild" "latest" "
 
 msg_info "Setting up Application"
 mkdir -p /opt/themearr/data
+# The API fail-closes if THEMEARR_AUTH_TOKEN is unset, so generate a 256-bit token
+# (preserving an existing one on re-run) and hand it to the service via EnvironmentFile.
+AUTH_ENV="/opt/themearr/data/auth.env"
+if [[ ! -s "$AUTH_ENV" ]]; then
+  THEMEARR_TOKEN="$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+  (umask 077; printf 'THEMEARR_AUTH_TOKEN=%s\n' "$THEMEARR_TOKEN" >"$AUTH_ENV")
+  chmod 600 "$AUTH_ENV"
+else
+  THEMEARR_TOKEN="$(grep -oP '^THEMEARR_AUTH_TOKEN=\K.*' "$AUTH_ENV")"
+fi
 msg_ok "Set up Application"
 
 # =============================================================================
@@ -75,6 +76,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/themearr
+EnvironmentFile=/opt/themearr/data/auth.env
 Environment="HOME=/opt/themearr/data"
 Environment="XDG_CACHE_HOME=/opt/themearr/data/.cache"
 Environment="DB_PATH=/opt/themearr/data/themearr.db"
@@ -89,6 +91,14 @@ WantedBy=multi-user.target
 EOF
 systemctl enable -q --now themearr
 msg_ok "Created Service"
+
+# Save the access token where the operator can retrieve it, and print it once.
+{
+  echo "Themearr Access Token: ${THEMEARR_TOKEN}"
+} >~/themearr.creds
+chmod 600 ~/themearr.creds
+msg_ok "Access token saved to /root/themearr.creds"
+echo -e "\n  Themearr access token (enter this in the web UI on first load):\n    ${THEMEARR_TOKEN}\n  Also saved at /root/themearr.creds\n"
 
 # =============================================================================
 # CLEANUP & FINALIZATION
