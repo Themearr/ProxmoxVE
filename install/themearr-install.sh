@@ -101,6 +101,30 @@ msg_ok "Access token saved to /root/themearr.creds"
 echo -e "\n  Themearr access token (enter this in the web UI on first load):\n    ${THEMEARR_TOKEN}\n  Also saved at /root/themearr.creds\n"
 
 # =============================================================================
+# IN-APP UPDATER HELPER
+# =============================================================================
+# The in-app "Update" button runs this fixed path. It prefers the checksum-verified
+# deploy.sh shipped inside the release, and only falls back to fetching it (pinned to
+# the installed tag, never mutable main). The service runs as root, so no sudo needed.
+
+msg_info "Installing updater helper"
+cat <<'UPDATER_EOF' >/usr/local/bin/themearr-update
+#!/usr/bin/env bash
+set -euo pipefail
+REPO="Themearr/themearr"
+LOCAL="/opt/themearr/deploy.sh"
+if [[ -f "$LOCAL" ]]; then
+  exec bash "$LOCAL"
+fi
+REF="$(cat /opt/themearr/VERSION 2>/dev/null || echo main)"
+[[ "$REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || REF="main"
+curl -fsSL "https://raw.githubusercontent.com/${REPO}/${REF}/deploy.sh" | bash
+UPDATER_EOF
+chmod 755 /usr/local/bin/themearr-update
+chown root:root /usr/local/bin/themearr-update
+msg_ok "Installed updater helper"
+
+# =============================================================================
 # CLEANUP & FINALIZATION
 # =============================================================================
 
