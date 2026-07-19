@@ -26,13 +26,13 @@ $STD apt-get install -y \
 msg_ok "Installed Dependencies"
 
 # =============================================================================
-# .NET 9 RUNTIME
+# .NET 10 RUNTIME
 # =============================================================================
 
-msg_info "Installing .NET 9 Runtime"
-$STD bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 9.0 --runtime aspnetcore --install-dir /usr/share/dotnet"
+msg_info "Installing .NET 10 Runtime"
+$STD bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 10.0 --runtime aspnetcore --install-dir /usr/share/dotnet"
 ln -sf /usr/share/dotnet/dotnet /usr/local/bin/dotnet
-msg_ok "Installed .NET 9 Runtime"
+msg_ok "Installed .NET 10 Runtime"
 
 # =============================================================================
 # DOWNLOAD & DEPLOY APPLICATION
