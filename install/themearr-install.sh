@@ -18,8 +18,9 @@ update_os
 # =============================================================================
 
 msg_info "Installing Dependencies"
-# Theme audio is fetched over HTTP from the youtube-mp36 RapidAPI, so ffmpeg/yt-dlp
-# are no longer needed. openssl is used to generate the API auth token below.
+# Unprocessed downloads use the RapidAPI and need no encoder. Optional processing
+# needs ffmpeg/ffprobe; leave installation of those tools an explicit operator choice.
+# openssl generates the API auth token below.
 $STD apt-get install -y \
   curl \
   openssl
@@ -91,6 +92,12 @@ WantedBy=multi-user.target
 EOF
 systemctl enable -q --now themearr
 msg_ok "Created Service"
+
+if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+  msg_ok "Optional audio processing tools are available"
+else
+  msg_info "Optional audio processing: install ffmpeg inside this LXC before enabling it (apt-get install ffmpeg)"
+fi
 
 # Save the access token where the operator can retrieve it, and print it once.
 {

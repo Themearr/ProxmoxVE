@@ -72,6 +72,11 @@ function update_script() {
     msg_info "Starting Service"
     systemctl start themearr
     msg_ok "Started Service"
+    if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+      msg_ok "Optional audio processing tools are available"
+    else
+      msg_info "Optional audio processing: install ffmpeg inside this LXC before enabling it (apt-get install ffmpeg)"
+    fi
     msg_ok "Updated Successfully!"
   fi
   exit
